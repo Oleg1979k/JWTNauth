@@ -4,7 +4,6 @@
 use App\Http\Controllers\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -26,6 +25,10 @@ Route::get('/', function() {
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/user', [AuthController::class, 'getUser']);
+Route::middleware('jwt.admin')->group(function () {
+    Route::get('/hello', [AuthController::class, 'hello']);
+});
+
 
 Route::middleware('jwt.verify')->group(function() {
     Route::get('/dashboard', function() {

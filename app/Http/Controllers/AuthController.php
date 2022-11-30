@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Exceptions\JWTException;
@@ -33,13 +35,14 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        $input = $request->only('name', 'email', 'password', 'c_password');
-
+       // $input = $request->only('name', 'email', 'password', 'c_password','role');
+        $input = $request->json()->all();
         $validator = Validator::make($input, [
             'name' => 'required',
             'email' => 'required|email|unique:users',
             'password' => 'required|min:8',
             'c_password' => 'required|same:password',
+            'role' => ['required',Rule::in(['admin','guest'])],
         ]);
 
         if($validator->fails()){
@@ -96,4 +99,19 @@ class AuthController extends Controller
 
         return $this->sendResponse($user, "user data retrieved", 200);
     }
+
+    public function hello()
+    {
+        $user = JWTAuth::parseToken()->authenticate();
+        if($user->role == 'admin') {
+            $success = [
+                'token' => 'Hello world',
+            ];
+            return $this->sendResponse($success, 'successful login', 200);
+        }
+        else {
+          return $this->sendResponse('Error',403);
+        }
+        }
+
 }
